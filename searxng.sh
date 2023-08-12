@@ -32,8 +32,14 @@ _pull() {
 # ref : https://docs.searxng.org/admin/installation-docker.html
 _start(){
 
+	if [ ! -d "$1" ];then
+		echo "Directory not provided"
+		exit 1
 
-	cd /home/darklord/my-instance
+	fi
+
+	cd $1
+	pwd
 
 	PORT=8080
 	podman run --rm \
