@@ -6,6 +6,7 @@ show_help(){
 distrobox.sh
 
 Choose one of the available commands:
+	download
 	manufacture
 	help | --help | -h
 	
@@ -20,8 +21,15 @@ if [ $# -eq 0 ]; then
 	exit
 fi
 
+download() {
+	cd $(mktemp -d)
+	git clone https://github.com/89luca89/distrobox.git
+	cd distrobox
+	pwd
+	ls
+}
 
-_manufacture() {
+manufacture() {
 
 	distrobox-manufacture.sh
 
@@ -31,9 +39,13 @@ _manufacture() {
 main() {
 
 	case "$1" in 
+		(download)
+			shift
+			download "$@"
+			;;
 		(manufacture)
 			shift
-			_manufacture "$@"
+			manufacture "$@"
 			;;
 		(help | --help | -h)
 			show_help 
