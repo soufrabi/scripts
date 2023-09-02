@@ -10,15 +10,18 @@ Choose one of the available commands:
 	clean
 	config
 	help | --help | -h
-	
+
 EOF
 
 
 }
 
+sudo_mode=true
 package_location="${HOME}/.local/share/neovim"
 install_location="/usr/local/bin"
 
+package_location_sudo="/opt/neovim"
+install_location_sudo="/usr/local/bin"
 
 remove_package() {
 
@@ -52,6 +55,41 @@ sudo ln -sv "${package_location}/nvim-linux64/bin/nvim" "${install_location}"
 
 }
 
+
+remove_package_sudo() {
+
+sudo rm -rv "${package_location_sudo}"
+sudo rm -v "${install_location_sudo}/nvim"
+
+}
+
+install_package_appimage_sudo() {
+
+sudo mkdir -pv "${package_location_sudo}"
+cd "${package_location_sudo}"
+
+sudo curl -LJO https://github.com/neovim/neovim/releases/download/stable/nvim.appimage
+sudo chmod --verbose +x nvim.appimage
+sudo ./nvim.appimage --appimage-extract
+
+sudo ln -sv "${package_location_sudo}/squashfs-root/usr/bin/nvim" "${install_location_sudo}"
+
+}
+
+install_package_tarball_sudo() {
+
+sudo mkdir -pv "${package_location_sudo}"
+cd "${package_location_sudo}"
+
+sudo curl -LJO https://github.com/neovim/neovim/releases/download/stable/nvim-linux64.tar.gz
+sudo tar -xvzf nvim-linux64.tar.gz
+
+sudo ln -sv "${package_location_sudo}/nvim-linux64/bin/nvim" "${install_location_sudo}"
+
+}
+
+
+
 install_packer() {
 
 # Clone packer plugin manager
@@ -77,12 +115,17 @@ _config() {
 }
 
 _clean() {
-  remove_package
+  if [ $sudo_mode ]; then 
+    remove_package_sudo
+  else 
+    remove_package
+  fi
 
 }
 
 
 _install_options(){
+
 
   echo "Install neovim options :- "
   echo "1. Install neovim as appimage"
@@ -93,11 +136,19 @@ _install_options(){
   case "${_option}" in
   "1")
     echo "Installing appimage"
-    install_package_appimage
+    if [ $sudo_mode ];then 
+      install_package_appimage_sudo
+    else 
+      install_package_appimage
+    fi
     ;;
   "2")
     echo "Installing tarball"
-    install_package_tarball
+    if [ $sudo_mode ]; then
+      install_package_tarball_sudo
+    else 
+      install_package_tarball
+    fi
     ;;
   *)
     echo "Invalid option."
@@ -110,6 +161,12 @@ esac
 
 
 main() {
+    
+    if [ $sudo_mode ]; then
+      printf "Running in sudo mode \n"
+    else 
+      printf "Running in regular user mode \n"
+    fi
 
 	case "$1" in 
 		(install)
