@@ -7,8 +7,9 @@ flatpak.sh
 
 Choose one of the available commands:
 	add-flathub
-	theming
+	theme-add
 	theme-rm
+	ls
 	help | --help | -h
 	
 EOF
@@ -34,33 +35,54 @@ theming_gtk() {
 	mkdir -p ~/.icons
 	cp -ruv /usr/share/themes/* ~/.themes
 	cp -ruv /usr/share/icons/* ~/.icons
-	flatpak override --user --filesystem=$HOME/.themes
-	flatpak override --user --filesystem=$HOME/.icons
+	flatpak override --user --filesystem=$HOME/.themes "$@"
+	flatpak override --user --filesystem=$HOME/.icons "$@"
 
-	flatpak override --user --env=GTK_THEME=Arc-Dark
-	# flatpak override --user --env=ICON_THEME=Adwaita-Dark
+	flatpak override --user --env=GTK_THEME=Arc-Dark "$@"
+	# flatpak override --user --env=ICON_THEME=Adwaita-Dark "$@"
 	
 
 
 }
 
-theme_rm() {
-
-	# Some apps don't work on theming
-	flatpak override --user --nofilesystem=$HOME/.themes $1
-	flatpak override --user --nofilesystem=$HOME/.icons $1
-	flatpak override --user --unset-env=GTK_THEME $1
-
-}
-
 theming_qt() {
 
-	flatpak override --user --filesystem=xdg-config/Kvantum:ro
-	flatpak override --user --env=QT_STYLE_OVERRIDE=kvantum
+	flatpak override --user --filesystem=xdg-config/Kvantum:ro "$@"
+	flatpak override --user --env=QT_STYLE_OVERRIDE=kvantum "$@"
 }
 
-theming() {
-	theming_gtk
+theme_rm() {
+
+	if [ $# -lt 1 ]; then
+		printf "Please pass the name of atleast one app"
+		exit
+	fi
+	# Some apps don't work on theming
+	# GTK
+	flatpak override --user --nofilesystem=$HOME/.themes "$@"
+	flatpak override --user --nofilesystem=$HOME/.icons "$@"
+	flatpak override --user --unset-env=GTK_THEME "$@"
+	# QT
+	flatpak override --user --nofilesystem=xdg-config/Kvantum "$@"
+	flatpak override --user --unset-env=QT_STYLE_OVERRIDE "$@"
+
+
+}
+
+
+theme_add() {
+
+	if [ $# -lt 1 ]; then
+		printf "Please pass the name of atleast one app"
+		exit
+	fi
+
+	theming_gtk "$@"
+	theming_qt "$@"
+}
+
+flatpak_app_ls() {
+	flatpak --user list --app --columns=application
 }
 
 main() {
@@ -70,13 +92,17 @@ main() {
 			shift
 			_add_flathub "$@"
 			;;
-		(theming)
+		(theme-add)
 			shift
-			 theming "$@"
+			 theme_add "$@"
 			;;
 		(theme-rm)
 			shift
 			 theme_rm "$@"
+			;;
+		(ls)
+			shift
+			 flatpak_app_ls "$@"
 			;;
 		(help | --help | -h)
 			show_help 
