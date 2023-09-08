@@ -59,7 +59,7 @@ install_package_appimage() {
 mkdir -pv "${package_location}"
 cd "${package_location}"
 
-curl -LJO "${appimage_url}"
+curl -L "${appimage_url}" -o nvim.appimage
 chmod --verbose +x nvim.appimage
 ./nvim.appimage --appimage-extract
 
@@ -92,7 +92,7 @@ install_package_appimage_sudo() {
 sudo mkdir -pv "${package_location_sudo}"
 cd "${package_location_sudo}"
 
-sudo curl -LJO "${appimage_url}"
+sudo curl -L "${appimage_url}" -o nvim.appimage
 sudo chmod --verbose +x nvim.appimage
 sudo ./nvim.appimage --appimage-extract
 
