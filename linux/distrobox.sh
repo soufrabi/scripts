@@ -6,7 +6,7 @@ show_help(){
 distrobox.sh
 
 Choose one of the available commands:
-	download
+	install
 	manufacture
 	help | --help | -h
 	
@@ -21,27 +21,45 @@ if [ $# -eq 0 ]; then
 	exit
 fi
 
-download() {
-	cd $(mktemp -d)
+insall_package() {
+	mkdir -p ~/gitrepos
+	cd ~/gitrepos
+
 	git clone https://github.com/89luca89/distrobox.git
 	cd distrobox
-	pwd
-	ls
+	pwd ; ls ;
+
+	printf "Do you want to install distrobox globally using sudo (y/n) (default:n) : "
+	read confirm_install_globally
+
+
+  case "$confirm_install_globally" in
+    (y* | Y*)
+      printf "Installing Globally \n"
+	  sudo ./install
+      ;;
+    (n* | N* | *)
+      printf "Installing for this user only \n"
+      printf "Make sure ${HOME}/.local/bin is in PATH \n"
+	  ./install
+      ;;
+  esac
+
+
 }
 
 manufacture() {
 
 	distrobox-manufacture.sh
 
-
 }
 
 main() {
 
 	case "$1" in 
-		(download)
+		(install)
 			shift
-			download "$@"
+			insall_package "$@"
 			;;
 		(manufacture)
 			shift

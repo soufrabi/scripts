@@ -23,6 +23,30 @@ install_location="/usr/local/bin"
 package_location_sudo="/opt/neovim"
 install_location_sudo="/usr/local/bin"
 
+appimage_x86_64_url="https://github.com/neovim/neovim/releases/download/stable/nvim.appimage"
+appimage_aarch64_url="https://github.com/matsuu/neovim-aarch64-appimage/releases/download/v0.9.0/nvim-v0.9.0.appimage"
+tarball_x86_64_url="https://github.com/neovim/neovim/releases/download/stable/nvim-linux64.tar.gz"
+tarball_aarch64_url=""
+appimage_url=""
+tarball_url=""
+
+case "$(arch)" in 
+  (x86_64)
+    printf "You are runnning x86_64 architecture \n"
+    appimage_url="${appimage_x86_64_url}"
+    tarball_url="${tarball_x86_64_url}"
+    ;;
+  (aarch64)
+    printf "You are running aarch64 architecture \n"
+    appimage_url="${appimage_aarch64_url}"
+    tarball_url="${tarball_aarch64_url}"
+    ;;
+  (*)
+    printf "Unknown Architecture ! [Abort] \n"
+    exit 1
+    ;;
+esac
+
 remove_package() {
 
 rm -rv "${package_location}"
@@ -35,7 +59,7 @@ install_package_appimage() {
 mkdir -pv "${package_location}"
 cd "${package_location}"
 
-curl -LJO https://github.com/neovim/neovim/releases/download/stable/nvim.appimage
+curl -LJO "${appimage_url}"
 chmod --verbose +x nvim.appimage
 ./nvim.appimage --appimage-extract
 
@@ -48,7 +72,7 @@ install_package_tarball() {
 mkdir -pv "${package_location}"
 cd "${package_location}"
 
-curl -LJO https://github.com/neovim/neovim/releases/download/stable/nvim-linux64.tar.gz
+curl -LJO "${tarball_url}"
 tar -xvzf nvim-linux64.tar.gz
 
 sudo ln -sv "${package_location}/nvim-linux64/bin/nvim" "${install_location}"
@@ -68,7 +92,7 @@ install_package_appimage_sudo() {
 sudo mkdir -pv "${package_location_sudo}"
 cd "${package_location_sudo}"
 
-sudo curl -LJO https://github.com/neovim/neovim/releases/download/stable/nvim.appimage
+sudo curl -LJO "${appimage_url}"
 sudo chmod --verbose +x nvim.appimage
 sudo ./nvim.appimage --appimage-extract
 
@@ -81,7 +105,7 @@ install_package_tarball_sudo() {
 sudo mkdir -pv "${package_location_sudo}"
 cd "${package_location_sudo}"
 
-sudo curl -LJO https://github.com/neovim/neovim/releases/download/stable/nvim-linux64.tar.gz
+sudo curl -LJO "${tarball_url}"
 sudo tar -xvzf nvim-linux64.tar.gz
 
 sudo ln -sv "${package_location_sudo}/nvim-linux64/bin/nvim" "${install_location_sudo}"
