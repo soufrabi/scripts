@@ -6,10 +6,11 @@ show_help(){
 setup-neovim.sh
 
 Choose one of the available commands:
-	install
-	clean
-	config
-	help | --help | -h
+    all
+    install
+    clean
+    config
+    help | --help | -h
 
 EOF
 
@@ -30,7 +31,10 @@ tarball_aarch64_url=""
 appimage_url=""
 tarball_url=""
 
-case "$(arch)" in 
+
+set_arch_urls() {
+
+case "$(arch)" in
   (x86_64)
     printf "You are runnning x86_64 architecture \n"
     appimage_url="${appimage_x86_64_url}"
@@ -46,6 +50,8 @@ case "$(arch)" in
     exit 1
     ;;
 esac
+
+}
 
 remove_package() {
 
@@ -125,89 +131,100 @@ git clone --depth 1 https://github.com/wbthomason/packer.nvim\
 
 clone_my_config() {
 
-git clone git@github.com:anirbandey1/nvim.git ~/.config/nvim
+    if [ ! -d "$HOME/.config/nvim" ]  ; then
+        git clone git@github.com:soufrabi/nvim.git ~/.config/nvim
+        git clone https://github.com/soufrabi/nvim.git ~/.config/nvim
+    fi
 
-git clone https://github.com/anirbandey1/nvim.git ~/.config/nvim
+    sh -c "cd ~/.config/nvim && git pull --all --verbose"
 
 }
 
-_config() {
+neovim_config() {
 
   install_packer
   clone_my_config
 
 }
 
-_clean() {
-  if [ $sudo_mode ]; then 
+neovim_clean() {
+  if [ $sudo_mode ]; then
     remove_package_sudo
-  else 
+  else
     remove_package
   fi
 
 }
 
 
-_install_options(){
+neovim_install_options(){
 
+  set_arch_urls
 
   echo "Install neovim options :- "
   echo "1. Install neovim as appimage"
   echo "2. Install neovim as tarball"
-  printf "Enter your option : "
-  read _option
+  printf "Enter your option [default:1] : "
+  local install_option_chosen
+  read install_option_chosen
 
-  case "${_option}" in
-  "1")
-    echo "Installing appimage"
-    if [ $sudo_mode ];then 
-      install_package_appimage_sudo
-    else 
-      install_package_appimage
-    fi
-    ;;
-  "2")
+  case "${install_option_chosen}" in
+  ("2")
     echo "Installing tarball"
     if [ $sudo_mode ]; then
       install_package_tarball_sudo
-    else 
+    else
       install_package_tarball
     fi
     ;;
-  *)
-    echo "Invalid option."
+  ("1"|*)
+    echo "Installing appimage"
+    if [ $sudo_mode ];then
+      install_package_appimage_sudo
+    else
+      install_package_appimage
+    fi
     ;;
 esac
 
 
 }
 
+neovim_all() {
+    neovim_install_options
+    neovim_config
+}
+
 
 
 main() {
-    
+
     if [ $sudo_mode ]; then
       printf "Running in sudo mode \n"
-    else 
+    else
       printf "Running in regular user mode \n"
     fi
 
-	case "$1" in 
+	case "$1" in
+		(all)
+			shift
+			neovim_all "$@"
+			;;
 		(install)
 			shift
-			_install_options "$@"
+			neovim_install_options "$@"
 			;;
 		(config)
 			shift
-			_config "$@"
+			neovim_config "$@"
 			;;
 		(clean)
 			shift
-			_clean "$@"
+			neovim_clean "$@"
 			;;
 		(help | --help | -h)
-			show_help 
-			exit 0 
+			show_help
+			exit 0
 			;;
 		(*)
 			printf >&2 "Error: invalid command\n"
@@ -216,7 +233,7 @@ main() {
 			;;
 
 	esac
-	
+
 
 }
 
