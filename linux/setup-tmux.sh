@@ -29,12 +29,12 @@ git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
 
 clone_my_config() {
 
-    if [ ! -d "$HOME/.config/nvim" ]  ; then
+    if [ ! -d "$HOME/.config/tmux" ]  ; then
         # git clone git@github.com:soufrabi/config-tmux.git ~/.config/tmux
         git clone https://github.com/soufrabi/config-tmux.git ~/.config/tmux
     fi
 
-    sh -c "cd ~/.config/nvim && git pull --all --verbose"
+    sh -c "cd ~/.config/tmux && git pull --all --verbose"
 
 }
 
