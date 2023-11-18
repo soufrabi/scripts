@@ -132,8 +132,8 @@ git clone --depth 1 https://github.com/wbthomason/packer.nvim\
 clone_my_config() {
 
     if [ ! -d "$HOME/.config/nvim" ]  ; then
-        git clone git@github.com:soufrabi/nvim.git ~/.config/nvim
-        git clone https://github.com/soufrabi/nvim.git ~/.config/nvim
+        # git clone git@github.com:soufrabi/config-nvim.git ~/.config/nvim
+        git clone https://github.com/soufrabi/config-nvim.git ~/.config/nvim
     fi
 
     sh -c "cd ~/.config/nvim && git pull --all --verbose"
