@@ -106,19 +106,26 @@ db_create() {
 
 
 
-  printf "If you want to pass any custom flags type them here (default: "") : "
-  local custom_flags
-  read custom_flags
+  printf "If you want to pass any pre init hooks type them here (default: "") : "
+  local pre_init_hooks_passed
+  local pre_init_hooks
+  read pre_init_hooks
 
-  if [ -n "$custom_flags" ]; then
-    printf "Using custom flags : ${custom_flags} \n"
+  if [ -n "$pre_init_hooks" ]; then
+    printf "Using pre init hooks : ${pre_init_hooks} \n"
+    pre_init_hooks_passed=true
   else
-    printf "Proceeding without any custom options \n"
+    printf "Proceeding without any pre init hooks \n"
+    pre_init_hooks_passed=false
   fi
 
   rmdir --ignore-fail-on-non-empty  -- ~/distroboxes/*
   mkdir -p "${db_home_dir}"
-  distrobox-create --name "${db_name}" --image "${db_image}"  --home "${db_home_dir}" ${separate_initsystem_flag} ${nvidia_flag} ${rootful_container_flag}  ${custom_flags}
+  if [ "${pre_init_hooks_passed}" = true ] ; then
+  distrobox-create --name "${db_name}" --image "${db_image}"  --home "${db_home_dir}" ${separate_initsystem_flag} ${nvidia_flag} ${rootful_container_flag}  --pre-init-hooks "${pre_init_hooks}"
+  else
+  distrobox-create --name "${db_name}" --image "${db_image}"  --home "${db_home_dir}" ${separate_initsystem_flag} ${nvidia_flag} ${rootful_container_flag}
+  fi
   distrobox-enter ${rootful_container_flag}  "${db_name}"
 }
 
