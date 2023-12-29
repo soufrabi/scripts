@@ -34,9 +34,9 @@ tarball_url=""
 
 set_arch_urls() {
 
-case "$(arch)" in
+case "$(uname -m)" in
   (x86_64)
-    printf "You are runnning x86_64 architecture \n"
+    printf "You are running x86_64 architecture \n"
     appimage_url="${appimage_x86_64_url}"
     tarball_url="${tarball_x86_64_url}"
     ;;
@@ -165,8 +165,8 @@ neovim_install_options(){
   echo "1. Install neovim as appimage"
   echo "2. Install neovim as tarball"
   printf "Enter your option [default:1] : "
-  local install_option_chosen
-  read install_option_chosen
+  install_option_chosen=""
+  read -r install_option_chosen
 
   case "${install_option_chosen}" in
   ("2")
