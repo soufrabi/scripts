@@ -19,10 +19,10 @@ EOF
 
 sudo_mode=true
 package_location="${HOME}/.local/share/neovim"
-install_location="/usr/local/bin"
+install_location="/usr/local"
 
 package_location_sudo="/opt/neovim"
-install_location_sudo="/usr/local/bin"
+install_location_sudo="/usr/local"
 
 appimage_x86_64_url="https://github.com/neovim/neovim/releases/download/stable/nvim.appimage"
 appimage_aarch64_url="https://github.com/matsuu/neovim-aarch64-appimage/releases/download/v0.9.0/nvim-v0.9.0.appimage"
@@ -31,6 +31,10 @@ tarball_aarch64_url=""
 appimage_url=""
 tarball_url=""
 
+if [ $sudo_mode ] ; then
+    package_location="${package_location_sudo}"
+    install_location="${install_location_sudo}"
+fi
 
 set_arch_urls() {
 
@@ -55,69 +59,45 @@ esac
 
 remove_package() {
 
-rm -rv "${package_location}"
-sudo rm -v "${install_location}/nvim"
-
+sudo rm -rv "${package_location}"
+sudo rm -v "${install_location}/bin/nvim"
+sudo rm -v "${install_location}/share/applications/nvim.desktop"
 }
 
 install_package_appimage() {
 
-mkdir -pv "${package_location}"
+sudo mkdir -pv "${package_location}"
 cd "${package_location}"
-
-curl -L "${appimage_url}" -o nvim.appimage
-chmod --verbose +x nvim.appimage
-./nvim.appimage --appimage-extract
-
-sudo ln -sv "${package_location}/squashfs-root/usr/bin/nvim" "${install_location}"
-
-}
-
-install_package_tarball() {
-
-mkdir -pv "${package_location}"
-cd "${package_location}"
-
-curl -LJO "${tarball_url}"
-tar -xvzf nvim-linux64.tar.gz
-
-sudo ln -sv "${package_location}/nvim-linux64/bin/nvim" "${install_location}"
-
-}
-
-
-remove_package_sudo() {
-
-sudo rm -rv "${package_location_sudo}"
-sudo rm -v "${install_location_sudo}/nvim"
-
-}
-
-install_package_appimage_sudo() {
-
-sudo mkdir -pv "${package_location_sudo}"
-cd "${package_location_sudo}"
 
 sudo curl -L "${appimage_url}" -o nvim.appimage
 sudo chmod --verbose +x nvim.appimage
 sudo ./nvim.appimage --appimage-extract
 
-sudo ln -sv "${package_location_sudo}/squashfs-root/usr/bin/nvim" "${install_location_sudo}"
+sudo mkdir -pv "${install_location}/bin"
+sudo mkdir -pv "${install_location}/share/applications"
+sudo mkdir -pv "${install_location}/share/icons"
+sudo ln -sv "${package_location}/squashfs-root/usr/bin/nvim" "${install_location}/bin"
+sudo ln -sv "${package_location}/squashfs-root/usr/share/applications/nvim.desktop" "${install_location}/share/applications"
 
 }
 
-install_package_tarball_sudo() {
+install_package_tarball() {
 
-sudo mkdir -pv "${package_location_sudo}"
-cd "${package_location_sudo}"
+sudo mkdir -pv "${package_location}"
+cd "${package_location}"
 
 sudo curl -LJO "${tarball_url}"
 sudo tar -xvzf nvim-linux64.tar.gz
 
-sudo ln -sv "${package_location_sudo}/nvim-linux64/bin/nvim" "${install_location_sudo}"
+
+sudo mkdir -pv "${install_location}/bin"
+sudo mkdir -pv "${install_location}/share/applications"
+sudo mkdir -pv "${install_location}/share/icons"
+
+sudo ln -sv "${package_location}/nvim-linux64/bin/nvim" "${install_location}/bin"
+sudo ln -sv "${package_location}/nvim-linux64/share/applications/nvim.desktop" "${install_location}/share/applications/nvim.desktop"
 
 }
-
 
 
 install_packer() {
@@ -148,11 +128,7 @@ neovim_config() {
 }
 
 neovim_clean() {
-  if [ $sudo_mode ]; then
-    remove_package_sudo
-  else
     remove_package
-  fi
 
 }
 
@@ -171,28 +147,51 @@ neovim_install_options(){
   case "${install_option_chosen}" in
   ("2")
     echo "Installing tarball"
-    if [ $sudo_mode ]; then
-      install_package_tarball_sudo
-    else
-      install_package_tarball
-    fi
+    install_package_tarball
     ;;
   ("1"|*)
     echo "Installing appimage"
-    if [ $sudo_mode ];then
-      install_package_appimage_sudo
-    else
-      install_package_appimage
-    fi
+    install_package_appimage
     ;;
 esac
 
 
 }
 
-neovim_all() {
+neovim_install_and_config() {
     neovim_install_options
     neovim_config
+}
+
+
+interactive_main_menu() {
+    
+  printf "Interactive Main Menu :-\n"
+  printf "1. Install Only\n"
+  printf "2. Clone Config\n"
+  printf "3. Install and Clone Config\n"
+  printf "4. Clean Existing Instatllation\n"
+  printf "Enter your option : "
+  read -r "option_chosen"
+  case "$option_chosen" in
+      1)
+          neovim_install_options
+        ;;
+      2)
+          neovim_config
+        ;;
+      3)
+          neovim_install_and_config
+          ;;
+       4)
+        neovim_clean
+            ;;
+     *)
+			printf >&2 "Error: invalid option selected\n"
+			exit 1
+         ;;
+ esac
+
 }
 
 
@@ -205,10 +204,16 @@ main() {
       printf "Running in regular user mode \n"
     fi
 
+    if [ $# -eq 0 ]; then
+	    interactive_main_menu
+	    exit
+    fi
+
+
 	case "$1" in
 		(all)
 			shift
-			neovim_all "$@"
+			neovim_install_and_config "$@"
 			;;
 		(install)
 			shift
@@ -231,7 +236,6 @@ main() {
 			show_help
 			exit 1
 			;;
-
 	esac
 
 
