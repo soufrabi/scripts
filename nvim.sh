@@ -25,7 +25,8 @@ install_location_sudo="/usr/local"
 
 appimage_x86_64_url="https://github.com/neovim/neovim/releases/download/stable/nvim.appimage"
 appimage_aarch64_url="https://github.com/matsuu/neovim-aarch64-appimage/releases/download/v0.9.0/nvim-v0.9.0.appimage"
-tarball_x86_64_url="https://github.com/neovim/neovim/releases/download/stable/nvim-linux64.tar.gz"
+# tarball_x86_64_url="https://github.com/neovim/neovim/releases/download/stable/nvim-linux64.tar.gz"
+tarball_x86_64_url="https://github.com/neovim/neovim/releases/latest/download/nvim-linux-x86_64.tar.gz"
 tarball_aarch64_url=""
 appimage_url=""
 tarball_url=""
@@ -86,14 +87,14 @@ install_package_tarball() {
 	cd "${package_location}"
 
 	sudo curl -LJO "${tarball_url}"
-	sudo tar -xvzf nvim-linux64.tar.gz
+	sudo tar -xvzf nvim-linux-x86_64.tar.gz
 
 	sudo mkdir -pv "${install_location}/bin"
 	sudo mkdir -pv "${install_location}/share/applications"
 	sudo mkdir -pv "${install_location}/share/icons"
 
-	sudo ln -sv "${package_location}/nvim-linux64/bin/nvim" "${install_location}/bin"
-	sudo ln -sv "${package_location}/nvim-linux64/share/applications/nvim.desktop" "${install_location}/share/applications/nvim.desktop"
+	sudo ln -sv "${package_location}/nvim-linux-x86_64/bin/nvim" "${install_location}/bin"
+	sudo ln -sv "${package_location}/nvim-linux-x86_64/share/applications/nvim.desktop" "${install_location}/share/applications/nvim.desktop"
 
 }
 
